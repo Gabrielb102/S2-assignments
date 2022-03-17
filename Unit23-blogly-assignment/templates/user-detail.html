@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<form action="/users">
+    <button class="title" type="submit"> 
+        <h2>Users</h2>
+    </button>
+</form>
+<img src="{{user.image_url}}" alt="{{user.first_name}}'s Profile Pic" class="detail-pic">
+<div id="info">
+    <h3>{{user.first_name}} {{user.last_name}}</h3>
+    <p>The bio would go here</p>
+</div>
+<div id="adjustments">
+    <form action="/users/{{user.id}}/edit" method="GET">
+        <button id="edit" type="submit">EDIT</button>
+    </form>
+    <form action="/users/{{user.id}}/delete" method="POST">
+        <button id="delete" type="submit">DELETE</button>
+    </form>
+</div>
+{% endblock %}
