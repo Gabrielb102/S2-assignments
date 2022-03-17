@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% for msg in get_flashed_messages() %}
+    
+<p class="flash">{{msg}}</p>
+
+{% endfor %}
+
+<ul>Total Blogly users
+
+{% for user in users %}
+
+    <li> 
+        <a href="/users/{{user.id}}"> 
+            <img src="{{user.image_url}}" alt="see {{user.first_name}}'s details" class="prof-pic">
+            {{user.first_name}} {{user.last_name}}
+        </a>
+    </li>
+
+{% endfor %}
+
+</ul>
+
+<form action="/users/new" method="GET">
+    <button>Create New User</button>
+</form>
+
+{% endblock %}
