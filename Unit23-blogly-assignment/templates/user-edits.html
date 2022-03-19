@@ -11,7 +11,8 @@
             <input type="text" name="last_name" value="{{user.last_name}}">
         </h3>
         <p>The bio would go here</p>
-        <button type="submit">SAVE</button>
+        <button type="submit" class="button">SAVE</button>
     </form>
+    <a class="button delete" href="/users/{{user.id}}">Cancel</a>
 </div>
 {% endblock %}

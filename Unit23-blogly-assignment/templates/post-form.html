@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<a class="title"> 
+    <img class="prof-pic" src="{{user.image_url}}" alt="Back to {{user.first_name}}'s page">
+    <h3>{{user.first_name}}</h3>
+</a>
+<div id="info">
+    <h2>New Post</h2>
+    <form action="/users/{{user.id}}/newpost" method="POST"> 
+        <h3>
+            <input class="edit" type="text" name="title" placeholder="Title for your story."> 
+            <textarea class="edit" rows="7" type="text" name="content" placeholder="Your story goes here.">
+            </textarea>
+        </h3>
+        <button class="button" type="submit">SAVE</button>
+    </form>
+    <a class='button delete' href="/users/{{user.id}}">Cancel</a>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 """Blogly application."""
 
 from flask import Flask, render_template, request, redirect, flash
-from models import db, connect_db, User
+from models import db, connect_db, User, Post
 
 app = Flask(__name__)
 connect_db(app)
@@ -10,9 +10,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = "Dontyadaughtadothatbaby"
-
-# I thought it would be better if I could just use an sql seed file so that 
-# the tables wouldn't be recreated every time I ran this app file.
 
 @app.route('/', methods=['GET'])
 def show_homepage() :
@@ -25,14 +22,13 @@ def show_users() :
     users = list(User.query.all())
     return render_template('users.html', users=users)
 
-# Make these ^ links to view the detail page for the user.
 @app.route('/users/<user_id>', methods=['GET'])
-def show_user_detail(user_id) :
-    """view the detail page for the user"""
+def show_user_and_posts(user_id) :
+    """view the detail page for the user, as well as show all of their posts"""
     user = User.query.get(int(user_id))
-    return render_template('user-detail.html', user=user)
+    posts = Post.query.filter(Post.user_id == user_id)
+    return render_template('user-detail.html', user=user, posts=posts)
 
-# Have a link here to the add-user form v.
 @app.route('/users/new', methods=['GET'])
 def show_new_user_form() :
     """Show an add form for users"""
@@ -87,4 +83,53 @@ def delete_user(user_id) :
     flash("user deleted")
     return redirect(f"/users")
 
+@app.route('/users/<user_id>/post<post_id>')
+def show_post_detail(user_id, post_id) :
+    """show a user's specified post"""
+    user = User.query.get(int(user_id))
+    post = Post.query.get(int(post_id))
+    return render_template("post.html", user=user, post=post)
 
+@app.route('/users/<user_id>/post<post_id>/delete', methods=['POST'])
+def delete_post(user_id, post_id) : 
+    """Delete the user's post"""
+    user = User.query.get(int(user_id))
+    post = Post.query.get(int(post_id))
+    db.session.delete(post)
+    db.session.commit()
+    flash("post deleted")
+    return redirect(f"/users/{user.id}")
+
+@app.route('/users/<user_id>/post<post_id>/edit', methods=['GET'])
+def show_edit_post(user_id, post_id) :
+    """Shows user page where edits to their post can be made"""
+    user = User.query.get(user_id)
+    post = Post.query.get(post_id)
+    return render_template('post-edits.html', user=user, post=post)
+
+@app.route('/users/<user_id>/post<post_id>/edit', methods=['POST'])
+def submit_post_edit(user_id, post_id) :
+    """Submits the changes made to the post by the user"""
+    user = User.query.get(user_id)
+    post = Post.query.get(post_id)
+    post.title = request.form['title']
+    post.content = request.form['content']
+    db.session.add(post)
+    db.session.commit()
+    return redirect(f"/users/{user.id}/post{post.id}")
+
+@app.route('/users/<user_id>/newpost', methods=['GET'])
+def show_post_form(user_id) :
+    user = User.query.get (user_id)
+    return render_template("post-form.html", user=user)
+
+@app.route('/users/<user_id>/newpost', methods=['POST'])
+def submit_post(user_id) :
+    user = User.query.get(user_id)
+    title = request.form['title']
+    content = request.form['content']
+    post = Post(title=title, content=content, user_id=user_id)
+    db.session.add(post)
+    db.session.commit()
+    newpost = Post.query.filter(Post.user_id==user_id, Post.title==title).first()
+    return redirect(f"/users/{user.id}/post{newpost.id}")

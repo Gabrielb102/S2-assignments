@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<a class="title"> 
+    <img class="prof-pic" src="{{post.author.image_url}}" alt="Back to {{post.author.first_name}}'s page">
+    <h3>{{post.author.first_name}}'s Posts</h3>
+</a>
+<div id="info">
+    <h2>Edit Post</h2>
+    <form action="/users/{{post.author.id}}/post{{post.id}}/edit" method="POST"> 
+        <h3>
+            <input class="edit" type="text" name="title" value="{{post.title}}"> 
+            <textarea class="edit" rows="7" type="text" name="content">
+                {{post.content}}
+            </textarea>
+        </h3>
+        <button class="button" type="submit">SAVE</button>
+    </form>
+    <a class='button delete' href="/users/{{post.author.id}}/post{{post.id}}">Cancel</a>
+</div>
+{% endblock %}
