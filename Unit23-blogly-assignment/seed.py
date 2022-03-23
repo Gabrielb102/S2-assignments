@@ -1,6 +1,6 @@
 """Seed file to make sample data for pets db."""
 
-from models import User, Post, db
+from models import User, Post, Tag, PostTag, db
 from app import app
 
 # Create all tables
@@ -53,9 +53,27 @@ gettys = Post(title='Gettysburg Address', content='''Four score and seven years 
     living and dead, who struggled here, have hallowed it, far above our poor power to add or detract. 
     The world will little note, nor long remember what we say here; while it can never forget what they did here.
     It is rather for us, the living, we here be dedicated to the great task remaining before us that, from these honored dead 
-    we take increased devotion to that cause for which they here, gave the last full measure of devotion that we 
+    we take increased devotion to that .cause for which they here, gave the last full measure of devotion that we 
     here highly resolve these dead shall not have died in vain; that the nation, shall have a new birth of freedom, 
     and that government of the people, by the people, for the people, shall not perish from the earth.''', user_id=5)
 
 db.session.add_all([sotu, gettys, guten])
+db.session.commit()
+
+story = Tag(tag="story")
+issues = Tag(tag="issues")
+usa = Tag(tag="usa")
+war = Tag(tag="war")
+civilwar = Tag(tag="civilwar")
+un = Tag(tag="un")
+europe = Tag(tag="europe")
+
+gettys.tags.append(usa)
+gettys.tags.append(civilwar)
+gettys.tags.append(war)
+sotu.tags.append(issues)
+sotu.tags.append(usa)
+guten.tags.append(un)
+
+db.session.add_all([story, usa, un, europe, war, civilwar, issues, gettys, sotu, guten])
 db.session.commit()

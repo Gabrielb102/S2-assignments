@@ -1,21 +1,13 @@
-{% extends 'base.html' %}
-
-{% block body %}
-<a class="title"> 
-    <img class="prof-pic" src="{{post.author.image_url}}" alt="Back to {{post.author.first_name}}'s page">
-    <h3>{{post.author.first_name}}'s Posts</h3>
-</a>
-<div id="info">
-    <h2>Edit Post</h2>
-    <form action="/users/{{post.author.id}}/post{{post.id}}/edit" method="POST"> 
-        <h3>
-            <input class="edit" type="text" name="title" value="{{post.title}}"> 
-            <textarea class="edit" rows="7" type="text" name="content">
-                {{post.content}}
-            </textarea>
-        </h3>
-        <button class="button" type="submit">SAVE</button>
-    </form>
-    <a class='button delete' href="/users/{{post.author.id}}/post{{post.id}}">Cancel</a>
-</div>
+{% extends 'post-base.html' %}
+{% block posttitle %} 
+<h2>Edit Post</h2>
+<form action="/users/{{user.id}}/post{{post.id}}/edit" method="POST"> 
+ {% endblock %}
+{% block content %} {{post.content}} {% endblock %}
+{% block tags %}
+{% for tag in tags %}
+<input id="{{tag.id}}" type="checkbox" style="display: none;" name="tag_id" value="{{tag.id}}"
+{% if tag in post.tags %} checked {% endif %}>
+<label for="{{tag.id}}">{{tag.tag}}</label>
+{% endfor %}
 {% endblock %}

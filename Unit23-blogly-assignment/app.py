@@ -1,7 +1,8 @@
 """Blogly application."""
 
 from flask import Flask, render_template, request, redirect, flash
-from models import db, connect_db, User, Post
+from models import db, connect_db, User, Post, Tag, PostTag
+import sys
 
 app = Flask(__name__)
 connect_db(app)
@@ -88,7 +89,8 @@ def show_post_detail(user_id, post_id) :
     """show a user's specified post"""
     user = User.query.get(int(user_id))
     post = Post.query.get(int(post_id))
-    return render_template("post.html", user=user, post=post)
+    tags = post.tags
+    return render_template("post.html", user=user, post=post, tags=tags)
 
 @app.route('/users/<user_id>/post<post_id>/delete', methods=['POST'])
 def delete_post(user_id, post_id) : 
@@ -105,31 +107,108 @@ def show_edit_post(user_id, post_id) :
     """Shows user page where edits to their post can be made"""
     user = User.query.get(user_id)
     post = Post.query.get(post_id)
-    return render_template('post-edits.html', user=user, post=post)
+    tags = Tag.query.all()
+    return render_template('post-edits.html', user=user, post=post, tags=tags)
 
 @app.route('/users/<user_id>/post<post_id>/edit', methods=['POST'])
 def submit_post_edit(user_id, post_id) :
-    """Submits the changes made to the post by the user"""
+    """Submits the changes made to the post by the user
+    and redirects to the post detail page"""
     user = User.query.get(user_id)
     post = Post.query.get(post_id)
     post.title = request.form['title']
     post.content = request.form['content']
+
+    tag_ids = request.form.getlist('tag_id')
+    tags = [Tag.query.get(int(tag_id)) for tag_id in tag_ids]
+    post.tags = tags
+
     db.session.add(post)
     db.session.commit()
     return redirect(f"/users/{user.id}/post{post.id}")
 
 @app.route('/users/<user_id>/newpost', methods=['GET'])
 def show_post_form(user_id) :
-    user = User.query.get (user_id)
-    return render_template("post-form.html", user=user)
+    """Shows new post creation interface"""
+    user = User.query.get(user_id)
+    tags = Tag.query.all()
+    return render_template("post-form.html", user=user, tags=tags)
 
 @app.route('/users/<user_id>/newpost', methods=['POST'])
 def submit_post(user_id) :
+    """Enters post into the database
+    with title, content, and tags, 
+    and redirects to the post detail page"""
+
     user = User.query.get(user_id)
     title = request.form['title']
     content = request.form['content']
     post = Post(title=title, content=content, user_id=user_id)
+
+    tag_ids = request.form.getlist('tag_id')
+    tags = [Tag.query.get(int(tag_id)) for tag_id in tag_ids]
+    [post.tags.append(tag) for tag in tags]
+
     db.session.add(post)
     db.session.commit()
     newpost = Post.query.filter(Post.user_id==user_id, Post.title==title).first()
     return redirect(f"/users/{user.id}/post{newpost.id}")
+
+@app.route('/tags', methods=['GET'])
+def show_all_tags() :
+    """shows list of all tags created on the app"""
+    tags = Tag.query.all()
+    return render_template("tags.html", tags=tags)
+
+@app.route('/tags/tag<tag_id>', methods=['GET'])
+def show_specific_tag(tag_id) :
+    """shows all the posts with specified tag"""
+    tag = Tag.query.get(int(tag_id))
+    posts = tag.posts
+    return render_template('tag-page.html', posts=posts, tag=tag)
+
+@app.route('/tags/newtag', methods=['GET'])
+def show_new_tag_form(user_id) :
+    """Shows new tag interface 
+    and preserves the referring page"""
+    link_back = request.referrer
+
+    return render_template('tag-form.html', link_back=link_back)
+
+@app.route('/tags/newtag', methods=['POST'])
+def submit_new_tag_form(user_id) :
+    """Enters a new tag into the database and redirects to the referring page"""
+    new_tag_name = request.form['new_tag'].lower()
+    new_tag = Tag(tag=new_tag_name)
+    returnurl = request.args.get('returnurl')
+
+    db.session.add(new_tag)
+    db.session.commit()
+    return redirect(str(returnurl))
+
+@app.route('/tags/edit', methods=['GET'])
+def show_edit_tag_page() :
+    """Shows user the post editing and deleting interface"""
+    tags = Tag.query.all()
+    return render_template("tags-edit.html", tags=tags)
+
+@app.route('/tags/edit', methods=['POST'])
+def submit_edit_tags() :
+    """submits any changes made to any tags and redirects to tag list"""
+    db.session.rollback()
+    tags = Tag.query.all()
+    for tag in tags :
+        tag.tag = request.form[f"{tag.id}"].lower()
+        db.session.add(tag)
+    db.session.commit()
+    tags = Tag.query.all()
+    return redirect('/tags')
+    """Submits all tag edits and redirects back to tag edit page"""
+
+@app.route('/tags/tag<tag_id>/delete', methods=['POST','GET'])
+def delete_tag(tag_id) :
+    """deletes specified tag and redirects to tag list"""
+    tag = Tag.query.get(int(tag_id))
+    db.session.delete(tag)
+    db.session.commit()
+    return redirect('/tags/edit')
