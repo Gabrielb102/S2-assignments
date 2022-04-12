@@ -8,17 +8,17 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
-class MODELNAME(db.Model) :
-    """WHAT DOES IT MODEL"""
+class User(db.Model) :
+    """Users for the site"""
 
-    __tablename__="TABLE NAME"
+    __tablename__="users"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    flavor = db.Column(db.String, nullable=False)
-    size = db.Column(db.String, nullable=False)
-    rating = db.Column(db.Float, nullable=False)
-    image = db.Column(db.String, nullable=False, default='https://tinyurl.com/demo-cupcake')
+    username = db.Column(db.String, primary_key=True, nullable=False)
+    password = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False)
+    first_name = db.Column(db.String(30), nullable=False)
+    last_name = db.Column(db.String(30), nullable=False)
 
     def __repr__(self) :
-        c = self
-        return f"HOW WOULD YOU REPRESENT YOUR MODEL"
+        u = self
+        return f"User {u.id}: {u.username}: {u.first_name} {u.last_name}"

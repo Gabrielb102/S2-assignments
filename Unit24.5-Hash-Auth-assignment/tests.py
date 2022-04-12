@@ -1,46 +1,49 @@
 from unittest import TestCase
-
 from app import app
-from models import db, Cupcake
+from models import db, User
+from forms import RegisterForm, LoginForm
+from flask_bcrypt import Bcrypt
 
 # Use test database and don't clutter tests with SQL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///TESTING DATABASE_test'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///users_test'
+app.config['WTF_CSRF_ENABLED'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-
-# Make Flask errors be real errors, rather than HTML pages with error info
 app.config['TESTING'] = True
+bcrypt = Bcrypt()
 
 db.drop_all()
 db.create_all()
 
 
-PROVIDE DATA YOU MIGHT FIND NECESSARY
+class UserSiteViewsTestCase(TestCase):
+    """Tests for views of UserSite."""
 
+    # def setUp(self):
+    #     """APPLIES BEFORE EACH TEST"""
 
-class APP_NAMEViewsTestCase(TestCase):
-    """Tests for views of API."""
+    #     User.query.delete()
 
-    def setUp(self):
-        """APPLIES BEFORE EACH TEST"""
+    #     NEWMODELINSTANCEFORTEST = MODEL(INSTANCE_DATA)
+    #     db.session.add(THEINSTANCE)
+    #     db.session.commit()
 
-        MODEL.query.delete()
-
-        NEWMODELINSTANCEFORTEST = MODEL(INSTANCE_DATA)
-        db.session.add(THEINSTANCE)
-        db.session.commit()
-
-        self.cupcake = cupcake
+    #     self.cupcake = cupcake
 
     def tearDown(self):
         """APPLIES AFTER EACH TEST"""
 
         db.session.rollback()
+        user_list = list(User.query.all())
+        db.session.delete_all(user_list)
 
-    def SAMPLETEST(self):
+    def register_test(self):
         with app.test_client() as client:
-            resp = client.get("/ROUTE TO TEST")
+            d = {"username":"BobtheBuilder666", "password":"passwordlol", "email":"BobtheBuilder666@gmail.com", "first_name":"Bob", "last_name":"LeBuilder"}
 
-            self.assertEqual(resp.status_code, 200)
+            resp = client.post("/register", data=d, follow_redirects=True)
+            user = User.query.get("BobtheBuilder666")
 
-            data = HOWEVER YOU ACCESS DATA
-            self.assertEqual
+            hashed = bcrypt.generate_password_hash("passwordlol")
+
+            self.assertIsInstance(user, User)
+            self.assertTrue(bcrypt.check_password_hash(user.password, hashed))
