@@ -29,12 +29,12 @@ class UserSiteViewsTestCase(TestCase):
 
     #     self.cupcake = cupcake
 
-    def tearDown(self):
-        """APPLIES AFTER EACH TEST"""
+    # def tearDown(self):
+    #     """APPLIES AFTER EACH TEST"""
 
-        db.session.rollback()
-        user_list = list(User.query.all())
-        db.session.delete_all(user_list)
+    #     db.session.rollback()
+    #     user_list = list(User.query.all())
+    #     db.session.delete_all(user_list)
 
     def register_test(self):
         with app.test_client() as client:
@@ -47,3 +47,19 @@ class UserSiteViewsTestCase(TestCase):
 
             self.assertIsInstance(user, User)
             self.assertTrue(bcrypt.check_password_hash(user.password, hashed))
+
+    def login_test(self):
+        with app.test_client() as client:
+            d = {"username":"BobtheBuilder666", "password":"passwordlol"}
+            f = {"username":"BobtheBuilder666", "password":"passwordl0l"}
+            u = {"username":"BobtheBuilder777", "password":"passwordlol"}
+
+            resp = client.post("/register", data=d, follow_redirects=True)
+            user = User.query.get("BobtheBuilder666")
+
+            hashed = bcrypt.generate_password_hash("passwordlol")
+            self.assertTrue(bcrypt.check_password_hash(user.password, hashed))
+
+    # def userpage_test(self):
+    #     with app.test_client() as client:
+    #         resp
