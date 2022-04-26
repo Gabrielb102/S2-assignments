@@ -267,7 +267,7 @@ def show_likes(user_id):
 # Messages routes:
 
 @app.route('/messages/new', methods=["GET", "POST"])
-def messages_add():
+def add_message():
     """Add a message:
 
     Show form if GET. If valid, update message and redirect to user page.
@@ -310,6 +310,7 @@ def messages_destroy(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
 
 @app.route('/users/add_like/<int:message_id>', methods=["POST"])
 def add_like(message_id):

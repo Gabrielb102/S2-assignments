@@ -94,7 +94,7 @@ class User(db.Model):
         nullable=False,
     )
 
-    messages = db.relationship('Message')
+    messages = db.relationship('Message', backref="author")
 
     followers = db.relationship(
         "User",
@@ -149,7 +149,6 @@ class User(db.Model):
         )
 
         db.session.add(user)
-        db.session.commit()
         return user
 
     @classmethod
@@ -199,6 +198,10 @@ class Message(db.Model):
         db.ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False,
     )
+
+def __repr__(self):
+    """represents the Message"""
+    return f"Message {self.id}: Created {self.timestamp} by User {self.user_id}"
 
 def connect_db(app):
     """Connect this database to provided Flask app.
